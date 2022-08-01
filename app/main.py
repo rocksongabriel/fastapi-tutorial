@@ -15,11 +15,11 @@ app = FastAPI()
 while True:
     try:
         conn = psycopg2.connect(
-            host='localhost',
-            database='myFastAPIDatabase',
-            user='darkbotbbl',
-            password='testpass1234',
-            cursor_factory=RealDictCursor
+            host="localhost",
+            database="myFastAPIDatabase",
+            user="darkbotbbl",
+            password="testpass1234",
+            cursor_factory=RealDictCursor,
         )
     except psycopg2.OperationalError as error:
         print("Connecting to database failed")
@@ -38,35 +38,6 @@ class Post(BaseModel):
     published: bool = True
 
 
-# Data
-posts: list[dict[str, Any]] = [
-    {
-        "id": 1,
-        "title": "Post One",
-        "content": "This is the first post",
-        "rating": 4,
-        "published": False,
-    },
-    {
-        "id": 2,
-        "title": "Post Two",
-        "content": "This is the second post",
-        "rating": None,
-        "published": True,
-    },
-]
-
-
-# Find post
-def find_post(post_id: int):
-    """Filter the posts array and return the post with id post_id"""
-    filtered_posts_iterable: Iterable = filter(
-        lambda post: post["id"] == post_id, posts
-    )
-    filtered_posts: list = list(filtered_posts_iterable)
-    return filtered_posts[0] if filtered_posts else None
-
-
 @app.get("/")
 def home():
     """The base endpoint"""
@@ -76,61 +47,76 @@ def home():
 @app.get("/posts")
 async def all_posts():
     """Return all posts"""
-    return posts
+    cursor.execute("""SELECT * FROM posts""")
+    posts = cursor.fetchall()
+    return {"data": posts}
 
 
 @app.get("/posts/{post_id}")
 async def get_post(post_id: int):
-    """Filter posts for post of id {id} and return the post"""
-    post = find_post(post_id)
+    """Find a post of id `post_id` and return it"""
+    cursor.execute(
+        """
+        SELECT * FROM posts p WHERE p.id = %s
+        """,
+        str(post_id),
+    )
+    post = cursor.fetchone()
     if not post:
-        msg = {"detail": {"post": f"Post with id {post_id} does not exist"}}
-        raise HTTPException(status.HTTP_404_NOT_FOUND, msg)
-    return {"detail": {"post": post}}
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Post with id {post_id} was not found",
+        )
+    return {"data": post}
 
 
 @app.post("/posts")
 async def create_post(post: Post):
-    """Add a post to the posts and return the post"""
-    post_dict = post.dict()
-    post_dict["id"] = randrange(0, 10000000)
-    posts.append(post_dict)
-    return {"data": post_dict}
-
-
-def find_post_index(post_id: int) -> Any:
-    """Return the index of the post with the given `post_id`"""
-    for idx, post in enumerate(posts):
-        if post["id"] == post_id:
-            return idx
+    """Add a new post to the database and return it"""
+    cursor.execute(
+        """
+        INSERT INTO posts (title, content, published) VALUES (%s, %s, %s) RETURNING *""",
+        (post.title, post.content, post.published),
+    )
+    conn.commit()
+    new_post = cursor.fetchone()
+    return {"data": new_post}
 
 
 @app.delete("/posts/{post_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_post(post_id: int):
-    """Find and delete post with id `post_id`"""
-    post_index: int = find_post_index(post_id)
-    if post_index:
-        posts.pop(post_index)
-    else:
+    """Delete a post from the database"""
+    cursor.execute(
+        """
+        DELETE FROM posts p WHERE p.id = %s RETURNING *
+        """,
+        str(post_id),
+    )
+    conn.commit()
+    deleted_post = cursor.fetchone()
+    if deleted_post is None:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail={"message": f"No post with id: {post_id}"},
+            status_code=status.HTTP_204_NO_CONTENT,
+            detail=f"Post with id {post_id} does not exist",
         )
-    return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 
 @app.put("/posts/{post_id}")
 def update_post(post_id: int, post: Post):
-    """Find and update post with id `post_id`"""
-    post_index: int = find_post_index(post_id)
+    """Update a given post by id in the database and return it"""
+    cursor.execute(
+        """
+        UPDATE posts p SET title = %s, content = %s, published = %s WHERE p.id = %s RETURNING *
+        """,
+        (post.title, post.content, post.published, str(post_id)),
+    )
+    conn.commit()
+    updated_post = cursor.fetchone()
 
-    if post_index:
-        post_dict = post.dict()
-        post_dict["id"] = post_id
-        posts[post_index] = post_dict
-    else:
+    if updated_post is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail={"message": f"No post with id: {post_id}"},
+            detail=f"Post with id {post_id} does not exist",
         )
-    return {"data": post_dict}
+
+    return {"detail": updated_post}
