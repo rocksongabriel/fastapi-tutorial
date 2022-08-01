@@ -3,11 +3,32 @@ from fastapi.responses import Response
 from pydantic import BaseModel
 from typing import Any, Iterable, Optional
 from random import randrange
+import psycopg2
+from psycopg2.extras import RealDictCursor
+import time
 
 
 # Initialize app
 app = FastAPI()
 
+# Make connection to postgres database
+while True:
+    try:
+        conn = psycopg2.connect(
+            host='localhost',
+            database='myFastAPIDatabase',
+            user='darkbotbbl',
+            password='testpass1234',
+            cursor_factory=RealDictCursor
+        )
+    except psycopg2.OperationalError as error:
+        print("Connecting to database failed")
+        print(f"Error: {error}")
+        time.sleep(2)
+    else:
+        cursor = conn.cursor()
+        print("Database connection established successfully")
+        break
 
 # Schemas
 class Post(BaseModel):

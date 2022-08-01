@@ -1,2 +1,3 @@
 __pycache__/
 timeline.txt
+.mypy_cache/
