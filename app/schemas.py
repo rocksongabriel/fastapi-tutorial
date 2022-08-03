@@ -1,4 +1,5 @@
 from pydantic import BaseModel
+from datetime import datetime
 
 
 class PostBase(BaseModel):
@@ -17,3 +18,13 @@ class PostUpdate(PostBase):
     """Schema representation for updating a post"""
 
     published: bool
+
+
+class Post(PostBase):
+    """Schema representation for the response Post"""
+
+    id: int
+    created: datetime
+
+    class Config:
+        orm_mode = True
