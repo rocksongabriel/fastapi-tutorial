@@ -7,11 +7,17 @@ authors = ["Gabriel Rockson <thegabrielrockson@gmail.com>"]
 [tool.poetry.dependencies]
 python = "^3.9"
 fastapi = "^0.79.0"
-uvicorn = {extras = ["standard"], version = "^0.18.2"}
 psycopg2-binary = "^2.9.3"
 mypy = "^0.971"
 SQLAlchemy = "^1.4.39"
 email-validator = "^1.2.1"
+flake8 = "^5.0.3"
+passlib = {extras = ["bcrypt"], version = "^1.7.4"}
+colorama = "^0.4.5"
+dnspython = "^2.2.1"
+graphene = "^3.1"
+python-dotenv = "^0.20.0"
+uvicorn = {extras = ["standard"], version = "^0.18.2"}
 
 [tool.poetry.dev-dependencies]
 black = "^22.6.0"
