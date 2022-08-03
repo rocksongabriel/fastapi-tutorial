@@ -1,10 +1,6 @@
-import time
-from fastapi import Depends, FastAPI, HTTPException, Response, status
-from pydantic import BaseModel
-import psycopg2
-from psycopg2.extras import RealDictCursor
+from fastapi import Depends, FastAPI, HTTPException, status
 from .database import engine, get_db
-from . import models
+from . import models, schemas
 from sqlalchemy.orm import Session
 
 
@@ -13,33 +9,6 @@ models.Base.metadata.create_all(bind=engine)
 
 # Initialize app
 app = FastAPI()
-
-
-# Make connection to postgres database
-while True:
-    try:
-        conn = psycopg2.connect(
-            host="localhost",
-            database="myFastAPIDatabase",
-            user="darkbotbbl",
-            password="testpass1234",
-            cursor_factory=RealDictCursor,
-        )
-    except psycopg2.OperationalError as error:
-        print("Connecting to database failed")
-        print(f"Error: {error}")
-        time.sleep(2)
-    else:
-        cursor = conn.cursor()
-        print("Database connection established successfully")
-        break
-
-
-# Schemas
-class Post(BaseModel):
-    title: str
-    content: str
-    published: bool = True
 
 
 @app.get("/")
@@ -63,7 +32,7 @@ async def get_post(post_id: int, db: Session = Depends(get_db)):
 
 
 @app.post("/posts")
-async def create_post(post: Post, db: Session = Depends(get_db)):
+async def create_post(post: schemas.PostCreate, db: Session = Depends(get_db)):
     """Add a new post to the database and return it"""
     new_post = models.Post(**post.dict())
     db.add(new_post)
@@ -89,7 +58,7 @@ def delete_post(post_id: int, db: Session = Depends(get_db)):
 @app.put("/posts/{post_id}")
 def update_post(
     post_id: int,
-    updated_post: Post,
+    updated_post: schemas.PostUpdate,
     db: Session = Depends(get_db)
 ):
     """Update a given post by id in the database and return it"""
