@@ -1,3 +1,4 @@
+from typing import List
 from fastapi import Depends, FastAPI, HTTPException, status
 from .database import engine, get_db
 from . import models, schemas
@@ -18,7 +19,7 @@ def home():
     return "Home of Tutorial"
 
 
-@app.get("/posts")
+@app.get("/posts", response_model=List[schemas.Post])
 async def all_posts(db: Session = Depends(get_db)):
     """Return all posts"""
 
@@ -27,16 +28,22 @@ async def all_posts(db: Session = Depends(get_db)):
     return posts
 
 
-@app.get("/posts/{post_id}")
+@app.get("/posts/{post_id}", response_model=schemas.Post)
 async def get_post(post_id: int, db: Session = Depends(get_db)):
     """Find a post of id `post_id` and return it"""
 
     post = db.query(models.Post).filter(models.Post.id == post_id).first()
 
+    if post is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Post with id {post_id} does not exist"
+        )
+
     return post
 
 
-@app.post("/posts")
+@app.post("/posts", response_model=schemas.Post)
 async def create_post(post: schemas.PostCreate, db: Session = Depends(get_db)):
     """Add a new post to the database and return it"""
 
@@ -65,7 +72,7 @@ def delete_post(post_id: int, db: Session = Depends(get_db)):
     db.commit()
 
 
-@app.put("/posts/{post_id}")
+@app.put("/posts/{post_id}", response_model=schemas.Post)
 def update_post(
     post_id: int, updated_post: schemas.PostUpdate, db: Session = Depends(get_db)
 ):
