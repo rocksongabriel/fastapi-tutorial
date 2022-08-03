@@ -5,6 +5,7 @@ from . import models, schemas
 from sqlalchemy.orm import Session
 
 
+# Create the database tables
 models.Base.metadata.create_all(bind=engine)
 
 

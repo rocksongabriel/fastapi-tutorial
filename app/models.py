@@ -15,3 +15,16 @@ class Post(Base):
     created = Column(
         TIMESTAMP(timezone=True), nullable=False, server_default=text("now()")
     )
+
+
+class User(Base):
+    """SQLAlchemy Database model for a user"""
+
+    __tablename__ = "users"
+
+    id = Column(Integer, primary_key=True, nullable=False)
+    emaill = Column(String, nullable=False, unique=True)
+    password = Column(String, nullable=False)
+    created = Column(
+        TIMESTAMP(timezone=True), nullable=False, server_default=text("now()")
+    )
