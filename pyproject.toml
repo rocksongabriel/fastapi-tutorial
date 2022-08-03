@@ -11,6 +11,7 @@ uvicorn = {extras = ["standard"], version = "^0.18.2"}
 psycopg2-binary = "^2.9.3"
 mypy = "^0.971"
 SQLAlchemy = "^1.4.39"
+email-validator = "^1.2.1"
 
 [tool.poetry.dev-dependencies]
 black = "^22.6.0"
