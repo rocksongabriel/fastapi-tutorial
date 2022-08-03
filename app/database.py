@@ -7,7 +7,7 @@ DATABASE_URL = "postgresql://darkbotbbl:testpass1234@localhost/myFastAPIDatabase
 
 engine = create_engine(DATABASE_URL)
 
-SessionLocal = sessionmaker(bind=DATABASE_URL, autocommit=False, autoflush=False)
+SessionLocal = sessionmaker(bind=engine, autocommit=False, autoflush=False)
 
 Base = declarative_base()
 
