@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, EmailStr
 from datetime import datetime
 
 
@@ -33,12 +33,12 @@ class Post(PostBase):
 class UserBase(BaseModel):
     """Schema representation for base user pydantic model"""
 
-    email: str
-    password: str
+    email: EmailStr
 
 
 class UserCreate(UserBase):
     """Schema representation for creating a user"""
+    password: str
 
 
 class User(UserBase):
