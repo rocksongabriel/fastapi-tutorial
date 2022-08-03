@@ -96,7 +96,7 @@ def update_post(
 
 
 # User related path operations
-@app.post("/users", status_code=status.HTTP_201_CREATED)
+@app.post("/users", response_model=schemas.User, status_code=status.HTTP_201_CREATED)
 def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
     """Create a new user object and return it"""
 
