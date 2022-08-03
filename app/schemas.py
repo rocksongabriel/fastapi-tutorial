@@ -41,7 +41,7 @@ class UserCreate(UserBase):
     password: str
 
 
-class User(UserBase):
+class UserRead(UserBase):
     """Schema representation for the User response model"""
 
     id: int

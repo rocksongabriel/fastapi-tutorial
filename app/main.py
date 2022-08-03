@@ -96,7 +96,7 @@ def update_post(
 
 
 # User related path operations
-@app.post("/users", response_model=schemas.User, status_code=status.HTTP_201_CREATED)
+@app.post("/users", response_model=schemas.UserRead, status_code=status.HTTP_201_CREATED)
 def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
     """Create a new user object and return it"""
 
@@ -110,3 +110,17 @@ def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
     db.refresh(new_user)
 
     return new_user
+
+
+@app.get("/users/{id}", response_model=schemas.UserRead)
+def get_user(id: int, db: Session = Depends(get_db)):
+    """Get user data from the database by id"""
+    user = db.query(models.User).filter(models.User.id == id).first()
+
+    if user is None:
+        raise HTTPException(
+            status_code=status.HTTP_201_CREATED,
+            detail=f"User with id {id} does not exist"
+        )
+
+    return user
