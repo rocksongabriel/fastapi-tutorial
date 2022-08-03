@@ -28,3 +28,24 @@ class Post(PostBase):
 
     class Config:
         orm_mode = True
+
+
+class UserBase(BaseModel):
+    """Schema representation for base user pydantic model"""
+
+    email: str
+    password: str
+
+
+class UserCreate(UserBase):
+    """Schema representation for creating a user"""
+
+
+class User(UserBase):
+    """Schema representation for the User response model"""
+
+    id: int
+    created: datetime
+
+    class Config:
+        orm_mode = True
