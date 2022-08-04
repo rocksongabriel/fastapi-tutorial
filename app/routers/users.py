@@ -1,5 +1,6 @@
 from fastapi import Depends, status, HTTPException, APIRouter
 from sqlalchemy.orm import Session
+from sqlalchemy.exc import IntegrityError
 from app import schemas, utils, models
 from app.database import get_db
 
@@ -18,9 +19,17 @@ def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
 
     new_user = models.User(**user.dict())
 
-    db.add(new_user)
-    db.commit()
-    db.refresh(new_user)
+    try:
+        db.add(new_user)
+        db.commit()
+    except IntegrityError as e:
+        print(e)
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail=f"User with email {user.email} already exists",
+        )
+    else:
+        db.refresh(new_user)
 
     return new_user
 
