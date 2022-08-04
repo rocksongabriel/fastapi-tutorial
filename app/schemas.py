@@ -49,3 +49,10 @@ class UserRead(UserBase):
 
     class Config:
         orm_mode = True
+
+
+class UserLogin(BaseModel):
+    """Schema for taking in login credentials from the user"""
+
+    email: EmailStr
+    password: str
