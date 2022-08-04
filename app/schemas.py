@@ -38,6 +38,7 @@ class UserBase(BaseModel):
 
 class UserCreate(UserBase):
     """Schema representation for creating a user"""
+
     password: str
 
 

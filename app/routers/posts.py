@@ -5,10 +5,7 @@ from app import models, schemas
 from app.database import get_db
 
 
-router = APIRouter(
-    prefix="/posts",
-    tags=["Posts"]
-)
+router = APIRouter(prefix="/posts", tags=["Posts"])
 
 
 @router.get("/", response_model=List[schemas.Post])
@@ -29,7 +26,7 @@ async def get_post(post_id: int, db: Session = Depends(get_db)):
     if post is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Post with id {post_id} does not exist"
+            detail=f"Post with id {post_id} does not exist",
         )
 
     return post
@@ -66,7 +63,9 @@ def delete_post(post_id: int, db: Session = Depends(get_db)):
 
 @router.put("/{post_id}", response_model=schemas.Post)
 def update_post(
-    post_id: int, updated_post: schemas.PostUpdate, db: Session = Depends(get_db)
+    post_id: int,
+    updated_post: schemas.PostUpdate,
+    db: Session = Depends(get_db),
 ):
     """Update a given post by id in the database and return it"""
 

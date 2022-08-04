@@ -1,32 +1,39 @@
 from fastapi import APIRouter, status, HTTPException, Depends
+from fastapi.security.oauth2 import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 from app.database import get_db
-from app import models, schemas, utils, oauth2
+from app import models, utils, oauth2
 
 
-router = APIRouter(
-    prefix="/auth",
-    tags=["Authentication"]
-)
+router = APIRouter(prefix="/auth", tags=["Authentication"])
 
 
 @router.post("/login")
-def login(credentials: schemas.UserLogin, db: Session = Depends(get_db)):
-    user = db.query(models.User).\
-            filter(models.User.email == credentials.email).first()
+def login(
+    credentials: OAuth2PasswordRequestForm = Depends(),
+    db: Session = Depends(get_db),
+):
+    """
+    Take user `attempted` login credentials and return a token if login
+    is successful
+    """
+
+    user = (
+        db.query(models.User)
+        .filter(models.User.email == credentials.username)
+        .first()
+    )
 
     if user is None:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Invalid Credentials"
+            status_code=status.HTTP_404_NOT_FOUND, detail="Invalid Credentials"
         )
 
     verified = utils.verify_password(credentials.password, user.password)
 
     if not verified:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Invalid Credentials"
+            status_code=status.HTTP_404_NOT_FOUND, detail="Invalid Credentials"
         )
 
     access_token = oauth2.create_access_token(
