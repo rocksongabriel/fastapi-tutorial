@@ -3,7 +3,8 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 
 
-DATABASE_URL = "postgresql://darkbotbbl:testpass1234@localhost/myFastAPIDatabase"
+DATABASE_URL = \
+        "postgresql://darkbotbbl:testpass1234@localhost/myFastAPIDatabase"
 
 engine = create_engine(DATABASE_URL)
 
