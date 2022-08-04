@@ -1,5 +1,6 @@
 from jose import jwt, JWTError
 from datetime import datetime, timedelta
+from app import schemas
 
 
 ALGORITHM = "HS256"
@@ -16,3 +17,21 @@ def create_access_token(data: dict) -> str:
     access_token = jwt.encode(data_to_encode, SECRET_KEY, algorithm=ALGORITHM)
 
     return access_token
+
+
+def verify_access_token(token: str, credentials_exception):
+    """Verify the token passed into the function"""
+
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=ALGORITHM)
+    except JWTError:
+        raise credentials_exception
+    else:
+        id: str = payload.get("user_id")
+
+        if id is None:
+            raise credentials_exception
+
+        token_data = schemas.TokenData(id=id)
+
+    return token_data
