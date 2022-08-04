@@ -1,6 +1,10 @@
 from jose import jwt, JWTError
 from datetime import datetime, timedelta
 from app import schemas
+from fastapi.security.oauth2 import OAuth2PasswordBearer
+from fastapi import Depends, HTTPException, status
+
+oauth2_scheme = OAuth2PasswordBearer("login")
 
 
 ALGORITHM = "HS256"
@@ -35,3 +39,14 @@ def verify_access_token(token: str, credentials_exception):
         token_data = schemas.TokenData(id=id)
 
     return token_data
+
+
+def get_current_user(token: str = Depends(oauth2_scheme)):
+    """Get the current authenticated user"""
+
+    credentials_exception = HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Invalid credentials or non existent account"
+    )
+
+    return verify_access_token(token, credentials_exception)
