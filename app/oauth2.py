@@ -3,6 +3,7 @@ from datetime import datetime, timedelta
 from app import schemas
 from fastapi.security.oauth2 import OAuth2PasswordBearer
 from fastapi import Depends, HTTPException, status
+from typing import Union
 
 oauth2_scheme = OAuth2PasswordBearer("login")
 
@@ -19,7 +20,9 @@ def create_access_token(data: dict) -> str:
     expiration_time = datetime.utcnow() + timedelta(
         minutes=TOKEN_EXPIRE_MINUTES
     )
-    data_to_encode.update({"exp": str(expiration_time)})
+    data_to_encode.update({
+        "exp": int(expiration_time.strftime("%Y%d%m%H%M%S"))
+    })
     access_token = jwt.encode(data_to_encode, SECRET_KEY, algorithm=ALGORITHM)
 
     return access_token
@@ -30,17 +33,19 @@ def verify_access_token(token: str, credentials_exception):
 
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=ALGORITHM)
-    except JWTError:
+        print(payload)
+    except JWTError as e:
+        print(e)  # TODO Use logging to print this out.
         raise credentials_exception
     else:
-        id: str = payload.get("user_id")
+        id: Union[str, None] = payload.get("user_id")
 
         if id is None:
             raise credentials_exception
 
         token_data = schemas.TokenData(id=id)
 
-    return token_data
+    return token_data  # Returns the id of the token data
 
 
 def get_current_user(token: str = Depends(oauth2_scheme)):
@@ -49,6 +54,7 @@ def get_current_user(token: str = Depends(oauth2_scheme)):
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Invalid credentials or non existent account",
+        headers={"WWW-Authenticate": "Bearer"},
     )
 
     return verify_access_token(token, credentials_exception)
