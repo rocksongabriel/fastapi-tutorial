@@ -1,16 +1,20 @@
 from jose import jwt, JWTError
 from datetime import datetime, timedelta
-from app import schemas
+
+from sqlalchemy.orm import Session
+from app import schemas, database
 from fastapi.security.oauth2 import OAuth2PasswordBearer
 from fastapi import Depends, HTTPException, status
 from typing import Union
+
+from app.models import User
 
 oauth2_scheme = OAuth2PasswordBearer("login")
 
 
 ALGORITHM = "HS256"
 SECRET_KEY = "tq22@u2fday)k4y8%1*rx*!&5769^r"
-TOKEN_EXPIRE_MINUTES = 1
+TOKEN_EXPIRE_MINUTES = 60
 
 
 def create_access_token(data: dict) -> str:
@@ -48,7 +52,10 @@ def verify_access_token(token: str, credentials_exception):
     return token_data  # Returns the id of the token data
 
 
-def get_current_user(token: str = Depends(oauth2_scheme)):
+def get_current_user(
+    token: str = Depends(oauth2_scheme),
+    db: Session = Depends(database.get_db)
+):
     """Get the current authenticated user"""
 
     credentials_exception = HTTPException(
@@ -57,4 +64,8 @@ def get_current_user(token: str = Depends(oauth2_scheme)):
         headers={"WWW-Authenticate": "Bearer"},
     )
 
-    return verify_access_token(token, credentials_exception)
+    token_data = verify_access_token(token, credentials_exception)
+
+    user = db.query(User).filter(User.id == token_data.id).first()
+
+    return user
