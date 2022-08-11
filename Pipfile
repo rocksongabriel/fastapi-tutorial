@@ -1,0 +1,28 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+
+[dev-packages]
+fastapi = "*"
+psycopg2-binary = "*"
+sqlalchemy = "*"
+email-validator = "*"
+passlib = "*"
+colorama = "*"
+dnspython = "*"
+graphene = "*"
+python-dotenv = "*"
+uvicorn = "*"
+python-jose = "*"
+python-multipart = "*"
+black = "*"
+ipython = "*"
+bpython = "*"
+flake8 = "*"
+mypy = "*"
+
+[requires]
+python_version = "3.9"
