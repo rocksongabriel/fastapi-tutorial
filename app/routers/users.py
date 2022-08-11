@@ -1,7 +1,7 @@
 from fastapi import Depends, status, HTTPException, APIRouter
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
-from app import schemas, utils, models
+from app import schemas, utils, models, oauth2
 from app.database import get_db
 
 
@@ -35,7 +35,11 @@ def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
 
 
 @router.get("/{id}", response_model=schemas.UserRead)
-def get_user(id: int, db: Session = Depends(get_db)):
+def get_user(
+    id: int,
+    db: Session = Depends(get_db),
+    user_id: int = Depends(oauth2.get_current_user),
+):
     """Get user data from the database by id"""
     user = db.query(models.User).filter(models.User.id == id).first()
 
