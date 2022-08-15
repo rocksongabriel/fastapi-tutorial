@@ -14,7 +14,7 @@ oauth2_scheme = OAuth2PasswordBearer("login")
 
 ALGORITHM = "HS256"
 SECRET_KEY = "tq22@u2fday)k4y8%1*rx*!&5769^r"
-TOKEN_EXPIRE_MINUTES = 60
+TOKEN_EXPIRE_MINUTES = 2
 
 
 def create_access_token(data: dict) -> str:
@@ -24,14 +24,18 @@ def create_access_token(data: dict) -> str:
     expiration_time = datetime.utcnow() + timedelta(
         minutes=TOKEN_EXPIRE_MINUTES
     )
+    #  data_to_encode.update(
+    #    {"exp": int(expiration_time.strftime("%Y%d%m%H%M%S"))}
+    #  )
     data_to_encode.update(
-        {"exp": int(expiration_time.strftime("%Y%d%m%H%M%S"))}
+        {"exp": expiration_time}
     )
     access_token = jwt.encode(data_to_encode, SECRET_KEY, algorithm=ALGORITHM)
 
     return access_token
 
 
+# TODO the verification of the token is not working.
 def verify_access_token(token: str, credentials_exception):
     """Verify the token passed into the function"""
 
@@ -39,7 +43,6 @@ def verify_access_token(token: str, credentials_exception):
         payload = jwt.decode(token, SECRET_KEY, algorithms=ALGORITHM)
         print(payload)
     except JWTError as e:
-        print(e)  # TODO Use logging to print this out.
         raise credentials_exception
     else:
         id: Union[str, None] = payload.get("user_id")
