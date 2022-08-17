@@ -21,27 +21,10 @@ class PostUpdate(PostBase):
     published: bool
 
 
-class Post(PostBase):
-    """Schema representation for the response Post"""
-
-    id: int
-    created: datetime
-    owner_id: int
-
-    class Config:
-        orm_mode = True
-
-
 class UserBase(BaseModel):
     """Schema representation for base user pydantic model"""
 
     email: EmailStr
-
-
-class UserCreate(UserBase):
-    """Schema representation for creating a user"""
-
-    password: str
 
 
 class UserRead(UserBase):
@@ -52,6 +35,24 @@ class UserRead(UserBase):
 
     class Config:
         orm_mode = True
+
+
+class Post(PostBase):
+    """Schema representation for the response Post"""
+
+    id: int
+    created: datetime
+    owner_id: int
+    owner: UserRead
+
+    class Config:
+        orm_mode = True
+
+
+class UserCreate(UserBase):
+    """Schema representation for creating a user"""
+
+    password: str
 
 
 class UserLogin(BaseModel):
