@@ -11,10 +11,11 @@ router = APIRouter(prefix="/posts", tags=["Posts"])
 async def all_posts(
     db: Session = Depends(get_db),
     current_user: models.User = Depends(oauth2.get_current_user),
+    limit: int = 10
 ):
     """Return all posts"""
 
-    posts = db.query(models.Post).all()
+    posts = db.query(models.Post).limit(limit).all()
 
     return posts
 
