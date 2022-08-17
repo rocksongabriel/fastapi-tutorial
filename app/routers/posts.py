@@ -46,7 +46,7 @@ async def create_post(
 ):
     """Add a new post to the database and return it"""
 
-    new_post = models.Post(**post.dict())
+    new_post = models.Post(owner_id=current_user.id, **post.dict())
 
     db.add(new_post)
     db.commit()
@@ -63,15 +63,23 @@ def delete_post(
 ):
     """Delete a post from the database"""
 
-    post = db.query(models.Post).filter(models.Post.id == post_id)
+    post_query = db.query(models.Post).filter(models.Post.id == post_id)
 
-    if post.first() is None:
+    post = post_query.first()
+
+    if post is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Post with id {post_id} does not exist",
         )
 
-    post.delete(synchronize_session=False)
+    if post.owner_id != current_user.id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Unauthorized to perform requested action"
+        )
+
+    post_query.delete(synchronize_session=False)
     db.commit()
 
 
@@ -92,6 +100,12 @@ def update_post(
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Post with id {post_id} does not exist",
+        )
+
+    if post.owner_id != current_user.id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Unauthorized to perform the requested action."
         )
 
     post_query.update(updated_post.dict(), synchronize_session=False)
