@@ -27,15 +27,15 @@ class UserBase(BaseModel):
     email: EmailStr
 
 
-class UserRead(UserBase):
-    """Schema representation for the User response model"""
+class UserOut(UserBase):
+    """
+    Schema representation for the user added to Post
+    """
 
     id: int
-    created: datetime
 
     class Config:
         orm_mode = True
-
 
 class Post(PostBase):
     """Schema representation for the response Post"""
@@ -43,7 +43,18 @@ class Post(PostBase):
     id: int
     created: datetime
     owner_id: int
-    owner: UserRead
+    owner: UserOut
+
+    class Config:
+        orm_mode = True
+
+
+class UserRead(UserBase):
+    """Schema representation for the User response model"""
+
+    id: int
+    created: datetime
+    posts: Post
 
     class Config:
         orm_mode = True

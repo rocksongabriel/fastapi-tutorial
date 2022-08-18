@@ -17,7 +17,7 @@ class Post(Base):
         TIMESTAMP(timezone=True), nullable=False, server_default=text("now()")
     )
     owner_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"))
-    owner = relationship("User")
+    owner = relationship("User", back_populates="posts")
 
 
 class User(Base):
@@ -31,3 +31,4 @@ class User(Base):
     created = Column(
         TIMESTAMP(timezone=True), nullable=False, server_default=text("now()")
     )
+    posts = relationship("Post", back_populates="owner")
