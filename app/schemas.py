@@ -1,6 +1,6 @@
 from pydantic import BaseModel, EmailStr
 from datetime import datetime
-from typing import Optional
+from typing import Optional, List
 
 
 class PostBase(BaseModel):
@@ -54,7 +54,7 @@ class UserRead(UserBase):
 
     id: int
     created: datetime
-    posts: Post
+    posts: List[Post] = []
 
     class Config:
         orm_mode = True
