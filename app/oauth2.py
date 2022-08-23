@@ -27,9 +27,7 @@ def create_access_token(data: dict) -> str:
     #  data_to_encode.update(
     #    {"exp": int(expiration_time.strftime("%Y%d%m%H%M%S"))}
     #  )
-    data_to_encode.update(
-        {"exp": expiration_time}
-    )
+    data_to_encode.update({"exp": expiration_time})
     access_token = jwt.encode(data_to_encode, SECRET_KEY, algorithm=ALGORITHM)
 
     return access_token
@@ -56,8 +54,7 @@ def verify_access_token(token: str, credentials_exception):
 
 
 def get_current_user(
-    token: str = Depends(oauth2_scheme),
-    db: Session = Depends(database.get_db)
+    token: str = Depends(oauth2_scheme), db: Session = Depends(database.get_db)
 ):
     """Get the current authenticated user"""
 

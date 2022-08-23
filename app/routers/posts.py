@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional
 from fastapi import Depends, status, HTTPException, APIRouter
 from sqlalchemy.orm import Session
 from app import models, schemas, oauth2
@@ -11,11 +11,19 @@ router = APIRouter(prefix="/posts", tags=["Posts"])
 async def all_posts(
     db: Session = Depends(get_db),
     current_user: models.User = Depends(oauth2.get_current_user),
-    limit: int = 10
+    limit: int = 10,
+    offset: int = 0,
+    search: Optional[str] = "",
 ):
     """Return all posts"""
 
-    posts = db.query(models.Post).limit(limit).all()
+    posts = (
+        db.query(models.Post)
+        .filter(models.Post.title.contains(search))
+        .limit(limit)
+        .offset(offset)
+        .all()
+    )
 
     return posts
 
@@ -77,7 +85,7 @@ def delete_post(
     if post.owner_id != current_user.id:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="Unauthorized to perform requested action"
+            detail="Unauthorized to perform requested action",
         )
 
     post_query.delete(synchronize_session=False)
@@ -106,7 +114,7 @@ def update_post(
     if post.owner_id != current_user.id:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="Unauthorized to perform the requested action."
+            detail="Unauthorized to perform the requested action.",
         )
 
     post_query.update(updated_post.dict(), synchronize_session=False)

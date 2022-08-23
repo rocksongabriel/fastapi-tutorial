@@ -37,7 +37,7 @@ def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
 @router.get("/{id}", response_model=schemas.UserRead)
 def get_user(
     id: int,
-    db: Session =  Depends(get_db),
+    db: Session = Depends(get_db),
     current_user: models.User = Depends(oauth2.get_current_user),
 ):
     """Get user data from the database by id"""

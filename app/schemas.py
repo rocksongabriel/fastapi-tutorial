@@ -37,6 +37,7 @@ class UserOut(UserBase):
     class Config:
         orm_mode = True
 
+
 class Post(PostBase):
     """Schema representation for the response Post"""
 
